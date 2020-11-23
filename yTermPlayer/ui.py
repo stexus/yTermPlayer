@@ -240,8 +240,21 @@ class player_ui(YoutubePlayer):
         self.init_list_and_listui(str(url))
 
     def init_list_and_listui(self,url):
+        url = 'https://www.youtube.com/playlist?list=PLk2YrjTUC_7jd0A18o0boPfLuDntZg09-'
         #New list has been loaded,remake the UI
         self.player_object.initPlaylist(url)
+        self.player_object.start_playing()
+        self._list_updated=True
+        self._isplayerUI=True
+        self.ui_object.original_widget=self.make_player_ui()
+
+    #todo: clean up probably
+    def init_mix_and_mixui(self, index):
+        try:
+            self.player_object.initMix(index)
+        except BaseException as err:
+            with open('errors.txt', 'a') as errors:
+                errors.write(str(err))
         self.player_object.start_playing()
         self._list_updated=True
         self._isplayerUI=True
@@ -289,6 +302,8 @@ class player_ui(YoutubePlayer):
 
         self.player_object.save_current_list()
 
+
+
     def handle_keys(self,key):
         if(key=='q'):
             raise urwid.ExitMainLoop()
@@ -299,6 +314,7 @@ class player_ui(YoutubePlayer):
         'e':self.player_object.play_last,
         ' ':self.toggle_playing,
         's':self.save_list,
+        'm': lambda: self.init_mix_and_mixui(int(self.playlistbox.focus_position)),
         '1': self.change_play_mode_to_repeat_one,
         '2': self.change_play_mode_to_repeat_list,
         '3': self.change_play_mode_to_repeat_off,

@@ -105,8 +105,16 @@ class YoutubePlayer:
         return self.repeat_mode
 
     def initPlaylist(self,url):
+        #set index to 0 to account for changing playlists
+        self.index = 0
         self.url = url
         self.playlist = pafy.get_playlist(url)
+        self.queue_len = len(self.playlist['items'])
+
+    def initMix(self, index):
+        mix = self.change_to_mix(index)
+        self.index = 0
+        self.playlist = mix 
         self.queue_len = len(self.playlist['items'])
 
     def save_current_list(self):
@@ -243,6 +251,12 @@ class YoutubePlayer:
         self.toggle_lock(True)
         # self.player.stop()
 
+    def change_to_mix(self, index): 
+        #create pafy mix and match to current playlist structure
+        curr_mix = self.playlist['items'][index]['pafy'].mix
+        mix = {'items': [{'pafy': pafyobj} for pafyobj in curr_mix]}
+        return mix
+
     def get_playlist_name(self):
         return self.playlist['title']
 
@@ -323,7 +337,7 @@ class YoutubePlayer:
 
     def current_song_name(self):
         return self._currentSong
-
+    
     def check_togglerLock(self):
         self._lock_mutex.acquire()
         value = self._togglerLock
