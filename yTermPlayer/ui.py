@@ -228,37 +228,35 @@ class player_ui(YoutubePlayer):
         list_box_padding=urwid.Padding(list_box,right=0,left=0)
         self.top.original_widget=list_box_padding
 
-    def list_load(self,button):
-        self.player_object.load_saved_playlist(str(button.get_label()).rstrip())
+    def update_list(self):
         self.player_object.start_playing()
         self._list_updated=True
         self._isplayerUI=True
         self.ui_object.original_widget=self.make_player_ui()
+
+    def list_load(self,button):
+        self.player_object.load_saved_playlist(str(button.get_label()).rstrip())
+        self.update_list()
 
     def input_url(self,button,url_field):
         url=url_field.get_edit_text().rstrip()
         self.init_list_and_listui(str(url))
 
     def init_list_and_listui(self,url):
-        url = 'https://www.youtube.com/playlist?list=PLk2YrjTUC_7jd0A18o0boPfLuDntZg09-'
         #New list has been loaded,remake the UI
-        self.player_object.initPlaylist(url)
-        self.player_object.start_playing()
-        self._list_updated=True
-        self._isplayerUI=True
-        self.ui_object.original_widget=self.make_player_ui()
+        playlist = pafy.get_playlist(url)
+        self.player_object.initPlaylist(playlist)
+        self.update_list()
 
     #todo: clean up probably
     def init_mix_and_mixui(self, index):
+        mix = self.player_object.change_to_mix(index)
         try:
-            self.player_object.initMix(index)
+            self.player_object.initPlaylist(mix)
         except BaseException as err:
             with open('errors.txt', 'a') as errors:
                 errors.write(str(err))
-        self.player_object.start_playing()
-        self._list_updated=True
-        self._isplayerUI=True
-        self.ui_object.original_widget=self.make_player_ui()
+        self.update_list()
 
     #Utility functions down below
     def change_play_mode_to_repeat_one(self):
@@ -299,8 +297,12 @@ class player_ui(YoutubePlayer):
         self.txt2_4.set_text(f"Volume: {(vol-1)*'█'}{(9-vol)*'░'}")
 
     def save_list(self):
-
         self.player_object.save_current_list()
+
+    def go_to_mix(self):
+        index = int(self.playlistbox.focus_position)
+        self.init_mix_and_mixui(index)
+
 
 
 
@@ -314,7 +316,7 @@ class player_ui(YoutubePlayer):
         'e':self.player_object.play_last,
         ' ':self.toggle_playing,
         's':self.save_list,
-        'm': lambda: self.init_mix_and_mixui(int(self.playlistbox.focus_position)),
+        'm':self.go_to_mix,
         '1': self.change_play_mode_to_repeat_one,
         '2': self.change_play_mode_to_repeat_list,
         '3': self.change_play_mode_to_repeat_off,

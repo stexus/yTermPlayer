@@ -104,17 +104,11 @@ class YoutubePlayer:
     def get_repeat_mode(self):
         return self.repeat_mode
 
-    def initPlaylist(self,url):
+    def initPlaylist(self, playlist):
         #set index to 0 to account for changing playlists
         self.index = 0
-        self.url = url
-        self.playlist = pafy.get_playlist(url)
-        self.queue_len = len(self.playlist['items'])
-
-    def initMix(self, index):
-        mix = self.change_to_mix(index)
-        self.index = 0
-        self.playlist = mix 
+        self.url = ""
+        self.playlist = playlist 
         self.queue_len = len(self.playlist['items'])
 
     def save_current_list(self):
