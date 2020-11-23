@@ -104,10 +104,13 @@ class YoutubePlayer:
     def get_repeat_mode(self):
         return self.repeat_mode
 
+    def convert_id(self, id):
+        return 'https://www.youtube.com/playlist?list=' + id
+
     def initPlaylist(self, playlist):
         #set index to 0 to account for changing playlists
-        self.index = 0
-        self.url = ""
+        self.index = -1
+        self.url = self.convert_id(playlist['playlist_id'])
         self.playlist = playlist 
         self.queue_len = len(self.playlist['items'])
 
@@ -158,9 +161,9 @@ class YoutubePlayer:
 
     def get_url_and_name(self,index):
         return [
-                self.playlist['items'][int(index)]['pafy'].getbestaudio().url,
-                self.playlist['items'][int(index)]['pafy'].title
-                ]
+            self.playlist['items'][int(index)]['pafy'].getbestaudio().url,
+            self.playlist['items'][int(index)]['pafy'].title
+        ]
 
     def get_next_index(self):
         try:
@@ -248,7 +251,7 @@ class YoutubePlayer:
     def change_to_mix(self, index): 
         #create pafy mix and match to current playlist structure
         curr_mix = self.playlist['items'][index]['pafy'].mix
-        mix = {'items': [{'pafy': pafyobj} for pafyobj in curr_mix]}
+        mix = {'items': [{'pafy': pafyobj} for pafyobj in curr_mix], 'playlist_id': self.url}
         return mix
 
     def get_playlist_name(self):
